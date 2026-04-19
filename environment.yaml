@@ -1,0 +1,10 @@
+name: nanopore-dataset-builder
+channels:
+  - conda-forge
+  - bioconda
+dependencies:
+  - snakemake=9.19.0
+  - minimap2=2.30
+  - pip
+  - pip:
+    - pod5==0.3.35
