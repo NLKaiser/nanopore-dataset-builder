@@ -8,7 +8,7 @@ This workflow handles the entire process from raw `FAST5` or `POD5` files to fin
 * **Conversion:** Automatically converts `FAST5` to `POD5`.
 * **Segmentation:** Splits long reads into manageable chunks (e.g., 5000 signals).
 * **Basecalling:** Integration with Dorado for high-accuracy basecalling.
-* **Labeling:** Aligns reads to a reference and filters by Soft Clipping, MapQ, Identity, and Coverage to ensure high-quality labels.
+* **Labeling:** Aligns reads to a reference and filters by Length, MapQ, Identity, Coverage and Soft Clipping to ensure high-quality labels.
 * **Dataset Creation:** Outputs numpy arrays (`chunks.npy`, `references.npy`, `reference_lengths.npy`) ready for machine learning.
 
 ## Prerequisites
@@ -40,7 +40,7 @@ All parameters are managed in `config.yaml`. Edit this file to match your data l
 Once configured, run the pipeline using Snakemake.  
 
     
-    snakemake --configfile config.yaml --cores 4
+    snakemake --configfile config.yaml --cores 1
     
 
 ## Output Structure
@@ -52,7 +52,7 @@ The pipeline organizes results into the directory defined in output_dir (default
 
 `dataset/references.npy`: The corresponding "ground truth" sequence for each chunk, derived from the alignment to the reference genome.
 
-`extract_labels_from_sam/labels.tsv`: A summary file containing the filtering metrics (Identity, Soft Clipping, Coverage) for every read that passed the quality checks.
+`extract_labels_from_sam/labels.tsv`: A summary file containing all reads that passed the filtering criteria.
 
 ## Utilities
 
@@ -66,11 +66,23 @@ The pipeline organizes results into the directory defined in output_dir (default
         --train-count 1000000 \
         --val-count 50000
   
-`merge_datasets.py`: This utility combines two separate NumPy datasets into a single, globally shuffled dataset using a balanced 50/50 sampling strategy from both sources.
-
+`merge_datasets.py`: This utility combines multiple separate NumPy datasets into a single, globally shuffled dataset. Each input dataset contributes a user-specified fraction of the final training and validation sets, with the fractions provided via `--ratios` (which must sum to 1). The script performs exact-count sampling, full global shuffling, memory-mapped I/O, and batch-wise processing for efficient handling of large datasets.
+  
     python merge_datasets.py \
+        ./path_to_dataset_1 \
+        ./path_to_dataset_2 \
+        ./path_to_dataset_3 \
+        --ratios 0.5 0.3 0.2 \
+        --out-dir ./merged \
+        --train-count 1000000 \
+        --val-count 50000
+  
+`merge_two_datasets_50_50.py`: This utility combines two separate NumPy datasets into a single, globally shuffled dataset using a balanced 50/50 sampling strategy from both sources.
+  
+    python merge_two_datasets_50_50.py \
         ./path_to_dataset_1 \
         ./path_to_dataset_2 \
         --out-dir ./merged \
         --train-count 1000000 \
         --val-count 50000
+

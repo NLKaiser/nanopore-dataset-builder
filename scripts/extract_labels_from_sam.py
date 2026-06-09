@@ -29,6 +29,16 @@ def parse_args():
         help="Output TSV file (default: labels.tsv)"
     )
     p.add_argument(
+        "--minlen",
+        default=0,
+        help="Minimum read length (default: 0)"
+    )
+    p.add_argument(
+        "--maxlen",
+        default=500,
+        help="Maximum read length (default: 500)"
+    )
+    p.add_argument(
         "--mapq",
         type=int,
         default=20,
@@ -41,17 +51,17 @@ def parse_args():
         help="Minimum alignment identity (default: 0.92)"
     )
     p.add_argument(
+        "--coverage",
+        type=float,
+        default=0.80,
+        help="Minimum aligned coverage of the read (default: 0.80)"
+    )
+    p.add_argument(
         "--max-soft-clip",
         type=int,
         default=2,
         dest="max_soft_clip",
         help="Max allowed soft-clipped bases at either end (default: 2)"
-    )
-    p.add_argument(
-        "--coverage",
-        type=float,
-        default=0.80,
-        help="Minimum aligned coverage of the read (default: 0.80)"
     )
     return p.parse_args()
 
@@ -186,6 +196,13 @@ def main():
 
             # Skip records missing essential stats
             if read_len is None or aln_bases == 0 or nm is None:
+                continue
+
+            # Read length filtering
+            if read_len < args.minlen:
+                continue
+
+            if read_len > args.maxlen:
                 continue
 
             # Calculate metrics

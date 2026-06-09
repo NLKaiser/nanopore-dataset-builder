@@ -12,13 +12,15 @@ segment: True                                   # Set to False to skip segmentat
 segment_length: 5000                            # Number of signals per segment
 
 # Filtering
+min_length: 0                                   # Minimum read length
+max_length: 500                                 # Maximum read length. This should always be equal or smaller than "pad_length"
 mapq: 20                                        # Minimum mapping quality
 identity: 0.90                                  # Minimum mapping quality
 max_soft_clip: 4                                # Maximum number of soft clippings
 coverage: 0.94                                  # Minimum coverage
 
 # Dataset
-max_length: 500                                 # Maximum number of bases per training entry. The remaining positions are padded with 0.
+pad_length: 500                                 # Maximum number of bases per training entry. The remaining positions are padded with 0.
 # Normalisation
 shift: 93.69239463939118                        # pA values are normalised: (pA - shift) / scale
 scale: 23.506745239082388                       # pA values are normalised: (pA - shift) / scale

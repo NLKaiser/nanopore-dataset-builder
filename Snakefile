@@ -13,11 +13,13 @@ DO_SEGMENT = config.get("segment", False)
 
 # Numerical Parameters (Defaults maintained)
 SEGMENT_LENGTH = config.get("segment_length", 5000)
+MIN_LENGTH = config.get("min_length", 0)
+MAX_LENGTH = config.get("max_length", 500)
 MAPQ = config.get("mapq", 20)
 IDENTITY = config.get("identity", 0.92)
 MAX_SOFT_CLIP = config.get("max_soft_clip", 2)
 COVERAGE = config.get("coverage", 0.80)
-MAX_LENGTH = config.get("max_length", 500)
+PAD_LENGTH = config.get("pad_length", 500)
 SHIFT = config.get("shift", 0)
 SCALE = config.get("scale", 1)
 
@@ -143,8 +145,9 @@ rule extract_labels_from_sam:
     log:
         os.path.join(OUT_DIR, "logs", "extract_labels_from_sam.log")
     shell:
-        "python3 scripts/extract_labels_from_sam.py --mapq {MAPQ} --identity {IDENTITY} "
-        "--max-soft-clip {MAX_SOFT_CLIP} --coverage {COVERAGE} {input} -o {output} > {log} 2>&1"
+        "python3 scripts/extract_labels_from_sam.py --minlen {MIN_LENGTH} --maxlen {MAX_LENGTH} "
+        "--mapq {MAPQ} --identity {IDENTITY} --coverage {COVERAGE} --max-soft-clip {MAX_SOFT_CLIP} "
+        "{input} -o {output} > {log} 2>&1"
 
 rule make_dataset_from_labels:
     input:
@@ -161,4 +164,4 @@ rule make_dataset_from_labels:
         os.path.join(OUT_DIR, "logs", "make_dataset_from_labels.log")
     shell:
         "python3 scripts/make_dataset_from_labels.py --tsv {input.labels} --fasta {input.references} "
-        "--pod5 {input.pod5} --maxlen {MAX_LENGTH} --shift {SHIFT} --scale {SCALE} --out-dir {params.out_dir} > {log} 2>&1"
+        "--pod5 {input.pod5} --padlen {PAD_LENGTH} --shift {SHIFT} --scale {SCALE} --out-dir {params.out_dir} > {log} 2>&1"

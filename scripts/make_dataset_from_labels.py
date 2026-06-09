@@ -11,13 +11,13 @@ Inputs:
  --tsv path  : TSV with header containing at least: QNAME, RNAME, POS, END, STRAND
  --fasta path: reference FASTA
  --pod5 path : a single POD5 file
- --maxlen n  : integer, length to pad/truncate reference sequences
+ --padlen n  : integer, length to pad/truncate reference sequences
  --shift f   : float, shift value for the normalisation
  --scale f   : float, scale value for the normalisation
 
 Outputs:
  - chunks.npy            (float32 array, shape (N_reads, signal_len))
- - references.npy        (uint8 array, shape (N_reads, maxlen), 0-padded)
+ - references.npy        (uint8 array, shape (N_reads, padlen), 0-padded)
  - reference_lengths.npy (int32 array, true reference lengths)
 """
 
@@ -47,7 +47,7 @@ def parse_args():
         required=True,
         help="POD5 file containing raw signal data"
     )
-    p.add_argument("--maxlen",
+    p.add_argument("--padlen",
         type=int,
         required=True,
         help="Fixed length for reference sequence padding"
@@ -114,14 +114,14 @@ def revcomp_bytes(bs: bytes) -> bytes:
         out[i] = comp.get(b, ord('N'))
     return bytes(out)
 
-def encode_reference(subseq: bytes, maxlen: int) -> Tuple[np.ndarray, int]:
+def encode_reference(subseq: bytes, padlen: int) -> Tuple[np.ndarray, int]:
     """
-    Maps DNA characters to NUC_MAP integers and pads/truncates to maxlen.
+    Maps DNA characters to NUC_MAP integers and pads/truncates to padlen.
     Returns the integer array and the original sequence length.
     """
     L = len(subseq)
-    enc = np.zeros((maxlen,), dtype=np.int8)
-    upto = min(L, maxlen)
+    enc = np.zeros((padlen,), dtype=np.int8)
+    upto = min(L, padlen)
     
     if upto > 0:
         arr = np.frombuffer(subseq[:upto], dtype=np.uint8)
@@ -239,7 +239,7 @@ def main():
 
         # Encode reference and fetch corresponding raw signal
         try:
-            enc, L = encode_reference(sub, args.maxlen)
+            enc, L = encode_reference(sub, args.padlen)
             sig = get_signal_from_pod5_dataset(ds, qname, args.shift, args.scale)
             
             signals_list.append(sig)
