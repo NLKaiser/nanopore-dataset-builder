@@ -77,6 +77,15 @@ The pipeline organizes results into the directory defined in output_dir (default
         --train-count 1000000 \
         --val-count 50000
   
+`create_test_dataset.py`: This utility randomly extracts a fixed number of samples from a NumPy dataset to create a test split. The remaining samples are saved separately, ensuring that test samples are removed from the original data.
+  
+    python create_test_dataset.py \
+        chunks.npy \
+        references.npy \
+        reference_lengths.npy \
+        --out-dir ./dataset \
+        --test-count 50000
+  
 `merge_two_datasets_50_50.py`: This utility combines two separate NumPy datasets into a single, globally shuffled dataset using a balanced 50/50 sampling strategy from both sources.
   
     python merge_two_datasets_50_50.py \

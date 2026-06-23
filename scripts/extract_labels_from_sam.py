@@ -30,11 +30,13 @@ def parse_args():
     )
     p.add_argument(
         "--minlen",
+        type=int,
         default=0,
         help="Minimum read length (default: 0)"
     )
     p.add_argument(
         "--maxlen",
+        type=int,
         default=500,
         help="Maximum read length (default: 500)"
     )
